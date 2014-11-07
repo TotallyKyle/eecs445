@@ -18,13 +18,48 @@ import FeatureParser as parser
 # data is a tuple where 
 # data[0] = input, data[1] = output
 # data[2] = min_val, data[3] = max_val in this sample model
+data = []
+feature_value_range = []
+joined_data = []
+joined_data = parser.add_feature_to_data_alt(data, 'initial_features_edited.csv', 'DJIA USA')
+data = joined_data[0]
+feature_value_range.append(joined_data[1])
+joined_data = parser.add_feature_to_data_alt(data, 'initial_features_edited.csv', 'NYK')
+data = joined_data[0]
+feature_value_range.append(joined_data[1])
 
-data = model.timeDelayed(5)
 
+# add time series features
+timeSeries = model.timeDelayedFeature(5)
+timeSeriesFeature = timeSeries[0]
+feature_value_range.append(timeSeries[1])
+feature_value_range.append(timeSeries[1])
+feature_value_range.append(timeSeries[1])
+feature_value_range.append(timeSeries[1])
+feature_value_range.append(timeSeries[1])
+
+data = parser.join_on_minimum(data, timeSeriesFeature)
+
+# construct the target value vector
+target = []
+target_val = parser.add_feature_to_data(target, 'USDJPY_complete.csv', 'Close')
+target = parser.match_target_to_data(target_val[0], data)
+
+
+# this converts the data structure from list of dicts to list of lists
+# for both input and target
+target = parser.convert_input(target)
+target = [val for sublist in target for val in sublist]
+target = model.normalize_target(target, target_val[1][0], target_val[1][1])
+
+data = parser.convert_input(data)
+
+minVal = min(target)
+maxVal = max(target)
 # we still need to implement validation so 0% is used for validation
 # 70% of the data is used for training and 30% for testing here
-segmented_input = parser.segmentation(data[0], 0.7, 0, 0.3)
-segmented_target = parser.segmentation(data[1], 0.7, 0, 0.3)
+segmented_input = parser.segmentation(data, 0.7, 0, 0.3)
+segmented_target = parser.segmentation(target, 0.7, 0, 0.3)
 train_input = segmented_input[0]
 train_target = segmented_target[0]
 
@@ -40,22 +75,18 @@ train_input = np.array(train_input)
 train_target = np.array(train_target)
 train_target = train_target.reshape(train_size, 1)
 
-
-min_val = data[2]
-max_val = data[3]
-
 # Create network with 3 layers with 5, 5, and 1 neruon(s) in each layer 
 # and randomly initialized
 # the first list refers to the range of values for each input feature, 
 # the length of the second list is the # of layers and each number is the # of nerons
 # EX: net = nl.net.newff([[-0.5, 0.5], [-0.5, 0.5], [-1,10]], [5, 3, 1])
-net = nl.net.newff([[min_val,max_val],[min_val,max_val],[min_val,max_val],[min_val,max_val],[min_val,max_val]],[5, 5, 1])
+net = nl.net.newff(feature_value_range,[7, 5, 1])
 
 # Train network
 error = net.train(train_input, train_target, epochs=500, show=100, goal=0.02)
 
 # Simulate network on tet data
-out = model.denormalize_target(net.sim(test_input).reshape(1,test_size).tolist()[0], min_val, max_val)
+out = model.denormalize_target(net.sim(test_input).reshape(1,test_size).tolist()[0], minVal, maxVal)
 
 # Plot result
 import pylab as pl
@@ -70,6 +101,6 @@ import pylab as pl
 # y3 = out.reshape(size)
 
 # pl.subplot(212)
-pl.plot(range(test_size), out, '-',range(test_size) , model.denormalize_target(test_target, min_val, max_val), '.')
+pl.plot(range(test_size), out, '-',range(test_size) , model.denormalize_target(test_target, minVal, maxVal), '.')
 pl.legend(['prediction value', 'actual value'])
 pl.show()

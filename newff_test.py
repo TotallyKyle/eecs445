@@ -12,7 +12,7 @@ import numpy as np
 
 # Create train samples
 x = np.linspace(-7, 7, 20)
-y = np.sin(x) * 5
+y = np.sin(x) * 0.5
 
 size = len(x)
 

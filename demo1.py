@@ -3,7 +3,7 @@
 Example of use multi-layer perceptron
 =====================================
 
-Task: Approximation function: 1/2 * sin(x)
+Task: Approximate USD_JPY exchnage rate
 
 """
 

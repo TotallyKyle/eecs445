@@ -7,9 +7,13 @@ from datetime import *
 from datetime import timedelta
 from dateutil.parser import parse
 
+# this parser works specifically with the format
+# that is in initial_features_edited.csv
 def init_parse_alt(filename, feature_names):
 	list = []
 	feature_col = {}
+	minVal = 9999999
+	maxVal = 0
 	with open(filename, 'rb') as f:
 	    reader = csv.reader(f)
 	    line = reader.next()
@@ -22,17 +26,32 @@ def init_parse_alt(filename, feature_names):
 
 	    for row in reader:
 	    	EOD_vals = {}
+	    	invalid = False
 	        for feature, col_num in feature_col.iteritems():
 	        	if feature == 'date':
 	        		EOD_vals[feature] = parse(row[col_num])
 	        	else:
-	        		EOD_vals[feature] = row[col_num]
-	        list.append(EOD_vals)
-	    return list
+	        		if row[col_num] == '':
+	        			invalid = True
+	        		else:
+	        			EOD_vals[feature] = float(row[col_num])
+	        			if(EOD_vals[feature] > maxVal):
+	        				maxVal = EOD_vals[feature]
+	        			if(EOD_vals[feature] < minVal):
+	        				minVal = EOD_vals[feature]
+	    	if invalid == False:
+	        	list.append(EOD_vals)
+	    return list, minVal, maxVal
 
+# this parser works specifically with the format
+# that is in USD_JPY_sample.csv
+# more exchange rate historical data can be downloaded from
+# http://www.forexrate.co.uk/forexhistoricaldata.php
 def init_parse(filename, feature_names, datetime_format='%d.%m.%Y %H:%M:%S.%f'):
 	list = []
 	feature_col = {}
+	minVal = 9999999
+	maxVal = 0
 	with open(filename, 'rb') as f:
 	    reader = csv.reader(f)
 	    line = reader.next()
@@ -49,23 +68,70 @@ def init_parse(filename, feature_names, datetime_format='%d.%m.%Y %H:%M:%S.%f'):
 	        		EOD_vals[feature] = datetime.strptime(row[col_num], datetime_format)
 	        	else:
 	        		EOD_vals[feature] = float(row[col_num])
+	        		if(EOD_vals[feature] > maxVal):
+	        			maxVal = EOD_vals[feature]
+	        		if(EOD_vals[feature] < minVal):
+	        			minVal = EOD_vals[feature]
 	        list.append(EOD_vals)
-	    return list
+	    return list, minVal, maxVal
 
-#join dataset2 onto dataset1 on feature,
-#always assume dataset2 is more complete
-def join_on_feature(dataset1, dataset2, feature_name='date'):
-	data1ptr = 0
-	for idx in range(len(dataset2)):
-		if dataset1[data1ptr][feature_name].date() == dataset2[idx][feature_name].date():
-			dataset1[data1ptr].update(dataset2[idx])
-			data1ptr = data1ptr+1
-		#else if dataset1[data1ptr][feature_name].date() > dataset2[idx][feature_name].date():
-			#do nothing, no matching data in dataset1
-	return dataset1
+# joins 2 datasets together by joining on the smaller
+# of the 2 sets because some fields have missing dates
+def join_on_minimum(dataset1, dataset2, feature_name='date'):
+	if len(dataset1) > len(dataset2):
+		larger = dataset1
+		smaller = dataset2
+	else:
+		larger = dataset2
+		smaller = dataset1
+	smallerIdx = 0
+	while smaller[smallerIdx][feature_name].date() < larger[0][feature_name].date():
+		smallerIdx = smallerIdx + 1
+	result = []
+	for idx in range(len(larger)):
+		if smaller[smallerIdx][feature_name].date() == larger[idx][feature_name].date():
+			smaller[smallerIdx].update(larger[idx])
+			result.append(smaller[smallerIdx])
+			smallerIdx = smallerIdx+1
+			if smallerIdx == len(smaller):
+				break
+	return result
 
-#calculate moving average of past #range# days
-#for the specified feature
+def match_target_to_data(target, data, feature_name='date'):
+	dataIdx = 0
+	matched_target = []
+	for idx in range(len(target)):
+		if data[dataIdx][feature_name].date() == target[idx][feature_name].date():
+			matched_target.append(target[idx])
+			dataIdx = dataIdx+1
+			if dataIdx == len(data):
+				break
+	return matched_target
+
+def add_feature_to_data_alt(dataset, feature_source, feature_name):
+	new_data = init_parse_alt(feature_source, [feature_name])
+	new_feature_data = new_data[0]
+	minVal = new_data[1]
+	maxVal = new_data[2]
+
+	if len(dataset) > 0:
+		dataset = join_on_minimum(dataset, new_feature_data)
+	else:
+		dataset = new_feature_data
+	return dataset, [minVal, maxVal]
+
+def add_feature_to_data(dataset, feature_source, feature_name):
+	new_data = init_parse(feature_source, [feature_name])
+	new_feature_data = new_data[0]
+	minVal = new_data[1]
+	maxVal = new_data[2]
+
+	if len(dataset) > 0:
+		dataset = join_on_minimum(dataset, new_feature_data)
+	else:
+		dataset = new_feature_data
+	return dataset, [minVal, maxVal]
+
 def moving_average(dataset, target_row_num, range_len, feature='Close'):
 	total = 0
 	for i in range(range_len):
@@ -105,10 +171,11 @@ def convert_input(dataset):
 	for data in dataset:
 		raw_data = []
 		for feature in data:
-			raw_data.append(data[feature])
+			if feature != 'date':
+				raw_data.append(data[feature])
 		list.append(raw_data)
 	return list
 
 #takes a list/list of lists as input
-def convert_to_array(data)
+def convert_to_array(data):
 	return np.array(data)
