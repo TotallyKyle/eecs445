@@ -28,6 +28,11 @@ joined_data = parser.add_feature_to_data_alt(data, 'initial_features_edited.csv'
 data = joined_data[0]
 feature_value_range.append(joined_data[1])
 
+joined_data = parser.add_feature_to_data_alt(data, 'initial_features_edited.csv', 'SPX Index')
+data = joined_data[0]
+feature_value_range.append(joined_data[1])
+
+
 # construct the target value vector
 target = []
 target_val = parser.add_feature_to_data(target, 'USDJPY_complete.csv', 'Close')
@@ -68,7 +73,9 @@ train_target = train_target.reshape(train_size, 1)
 # the first list refers to the range of values for each input feature, 
 # the length of the second list is the # of layers and each number is the # of nerons
 # EX: net = nl.net.newff([[-0.5, 0.5], [-0.5, 0.5], [-1,10]], [5, 3, 1])
-net = nl.net.newff(feature_value_range,[2, 5, 1])
+
+net = nl.net.newff(feature_value_range,[3, 5, 1])
+
 
 # Train network
 error = net.train(train_input, train_target, epochs=500, show=100, goal=0.02)
