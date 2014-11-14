@@ -50,6 +50,7 @@ max_val = data[3]
 # the length of the second list is the # of layers and each number is the # of nerons
 # EX: net = nl.net.newff([[-0.5, 0.5], [-0.5, 0.5], [-1,10]], [5, 3, 1])
 net = nl.net.newff([[min_val,max_val],[min_val,max_val],[min_val,max_val],[min_val,max_val],[min_val,max_val]],[5, 5, 1])
+nl.init.midpoint(net.layers[1])
 
 # Train network
 error = net.train(train_input, train_target, epochs=500, show=100, goal=0.02)

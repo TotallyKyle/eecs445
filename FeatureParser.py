@@ -176,6 +176,13 @@ def convert_input(dataset):
 		list.append(raw_data)
 	return list
 
+def convert_feature_value_range(feature_value_ranges):
+	ranges = []
+	for feature in feature_value_ranges:
+			if feature != 'date':
+				ranges.append(feature_value_ranges[feature])
+	return ranges
+
 #takes a list/list of lists as input
 def convert_to_array(data):
 	return np.array(data)

@@ -19,26 +19,28 @@ import FeatureParser as parser
 # data[0] = input, data[1] = output
 # data[2] = min_val, data[3] = max_val in this sample model
 data = []
-feature_value_range = []
+feature_value_range = {}
 joined_data = []
 joined_data = parser.add_feature_to_data_alt(data, 'initial_features_edited.csv', 'DJIA USA')
 data = joined_data[0]
-feature_value_range.append(joined_data[1])
+feature_value_range['DJIA USA'] = joined_data[1]
 joined_data = parser.add_feature_to_data_alt(data, 'initial_features_edited.csv', 'NYK')
 data = joined_data[0]
-feature_value_range.append(joined_data[1])
+feature_value_range['NYK'] = joined_data[1]
 
 
-# add time series features
+#add time series features
 timeSeries = model.timeDelayedFeature(5)
 timeSeriesFeature = timeSeries[0]
-feature_value_range.append(timeSeries[1])
-feature_value_range.append(timeSeries[1])
-feature_value_range.append(timeSeries[1])
-feature_value_range.append(timeSeries[1])
-feature_value_range.append(timeSeries[1])
+feature_value_range['0'] = timeSeries[1]
+feature_value_range['1'] = timeSeries[1]
+feature_value_range['2'] = timeSeries[1]
+feature_value_range['3'] = timeSeries[1]
+feature_value_range['4'] = timeSeries[1]
 
 data = parser.join_on_minimum(data, timeSeriesFeature)
+
+
 
 # construct the target value vector
 target = []
@@ -52,6 +54,7 @@ target = parser.convert_input(target)
 target = [val for sublist in target for val in sublist]
 target = model.normalize_target(target, target_val[1][0], target_val[1][1])
 
+feature_value_range = parser.convert_feature_value_range(feature_value_range);
 data = parser.convert_input(data)
 
 minVal = min(target)
@@ -81,7 +84,7 @@ train_target = train_target.reshape(train_size, 1)
 # the length of the second list is the # of layers and each number is the # of nerons
 # EX: net = nl.net.newff([[-0.5, 0.5], [-0.5, 0.5], [-1,10]], [5, 3, 1])
 net = nl.net.newff(feature_value_range,[7, 5, 1])
-
+nl.init.midpoint(net.layers[1])
 # Train network
 error = net.train(train_input, train_target, epochs=500, show=100, goal=0.02)
 
