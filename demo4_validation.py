@@ -20,24 +20,24 @@ import Validation as validation
 # data[0] = input, data[1] = output
 # data[2] = min_val, data[3] = max_val in this sample model
 data = []
-feature_value_range = []
+feature_value_range = {}
 joined_data = []
 joined_data = parser.add_feature_to_data_alt(data, 'initial_features_edited.csv', 'DJIA USA')
 data = joined_data[0]
-feature_value_range.append(joined_data[1])
+feature_value_range['DJIA USA'] = joined_data[1]
 joined_data = parser.add_feature_to_data_alt(data, 'initial_features_edited.csv', 'NYK')
 data = joined_data[0]
-feature_value_range.append(joined_data[1])
+feature_value_range['NYK'] = joined_data[1]
 
 
 # add time series features
-timeSeries = model.timeDelayedFeature(5)
+timeSeries = model.timeDelayedFeature(5, 'USDJPY_complete.csv')
 timeSeriesFeature = timeSeries[0]
-feature_value_range.append(timeSeries[1])
-feature_value_range.append(timeSeries[1])
-feature_value_range.append(timeSeries[1])
-feature_value_range.append(timeSeries[1])
-feature_value_range.append(timeSeries[1])
+feature_value_range['0'] = timeSeries[1]
+feature_value_range['1'] = timeSeries[1]
+feature_value_range['2'] = timeSeries[1]
+feature_value_range['3'] = timeSeries[1]
+feature_value_range['4'] = timeSeries[1]
 
 data = parser.join_on_minimum(data, timeSeriesFeature)
 
@@ -53,58 +53,68 @@ target = parser.convert_input(target)
 target = [val for sublist in target for val in sublist]
 target = model.normalize_target(target, target_val[1][0], target_val[1][1])
 
+feature_value_range = parser.convert_feature_value_range(feature_value_range);
 data = parser.convert_input(data)
 
 minVal = min(target)
 maxVal = max(target)
 # we still need to implement validation so 0% is used for validation
 # 70% of the data is used for training and 30% for testing here
-segmented_input = parser.segmentation(data, 0.7, 0.2, 0.1)
-segmented_target = parser.segmentation(target, 0.7, 0.2, 0.1)
+segmented_input = parser.segmentation(data, 0.8, 0.0, 0.2)
+segmented_target = parser.segmentation(target, 0.8, 0.0, 0.2)
 train_input = segmented_input[0]
 train_target = segmented_target[0]
-validation_input = segmented_input[1]
-validation_target = segmented_target[1]
-test_input = segmented_input[2]
-test_target = segmented_target[2]
 
 train_size = len(train_input)
-test_size = len(test_input)
-# we need to convert the format of the data to be
-# compliant with the neurolab API, print out the
-# values of inp and tar to see format
+
 train_input = np.array(train_input)
 train_target = np.array(train_target)
 train_target = train_target.reshape(train_size, 1)
 
-# Create network with 3 layers with 5, 5, and 1 neruon(s) in each layer 
-# and randomly initialized
-# the first list refers to the range of values for each input feature, 
-# the length of the second list is the # of layers and each number is the # of nerons
-# EX: net = nl.net.newff([[-0.5, 0.5], [-0.5, 0.5], [-1,10]], [5, 3, 1])
+## Find Optimal NN setup ##
+validation.k_folds(3, train_input, train_target, feature_value_range, minVal, maxVal)
 
-nn_set = validation.train_nn_set(train_input, train_target, feature_value_range)
-net = nl.net.newff(feature_value_range,[7, 5, 1])
 
-# Train network
-error = net.train(train_input, train_target, epochs=500, show=100, goal=0.02)
+# test_input = segmented_input[2]
+# test_target = segmented_target[2]
 
-# Simulate network on tet data
-out = model.denormalize_target(net.sim(test_input).reshape(1,test_size).tolist()[0], minVal, maxVal)
+# train_size = len(train_input)
+# test_size = len(test_input)
+# # we need to convert the format of the data to be
+# # compliant with the neurolab API, print out the
+# # values of inp and tar to see format
+# train_input = np.array(train_input)
+# train_target = np.array(train_target)
+# train_target = train_target.reshape(train_size, 1)
 
-# Plot result
-import pylab as pl
-# pl.subplot(211)
-# pl.plot(error)
-# pl.xlabel('Epoch number')
-# pl.ylabel('error (default SSE)')
+# # Create network with 3 layers with 5, 5, and 1 neruon(s) in each layer 
+# # and randomly initialized
+# # the first list refers to the range of values for each input feature, 
+# # the length of the second list is the # of layers and each number is the # of nerons
+# # EX: net = nl.net.newff([[-0.5, 0.5], [-0.5, 0.5], [-1,10]], [5, 3, 1])
 
-# x2 = np.linspace(-6.0,6.0,150)
-# y2 = net.sim(x2.reshape(x2.size,1)).reshape(x2.size)
+# nn_set = validation.train_nn_set(train_input, train_target, feature_value_range)
+# net = nl.net.newff(feature_value_range,[7, 5, 1])
 
-# y3 = out.reshape(size)
+# # Train network
+# error = net.train(train_input, train_target, epochs=500, show=100, goal=0.02)
 
-# pl.subplot(212)
-pl.plot(range(test_size), out, '-',range(test_size) , model.denormalize_target(test_target, minVal, maxVal), '.')
-pl.legend(['prediction value', 'actual value'])
-pl.show()
+# # Simulate network on tet data
+# out = model.denormalize_target(net.sim(test_input).reshape(1,test_size).tolist()[0], minVal, maxVal)
+
+# # Plot result
+# import pylab as pl
+# # pl.subplot(211)
+# # pl.plot(error)
+# # pl.xlabel('Epoch number')
+# # pl.ylabel('error (default SSE)')
+
+# # x2 = np.linspace(-6.0,6.0,150)
+# # y2 = net.sim(x2.reshape(x2.size,1)).reshape(x2.size)
+
+# # y3 = out.reshape(size)
+
+# # pl.subplot(212)
+# pl.plot(range(test_size), out, '-',range(test_size) , model.denormalize_target(test_target, minVal, maxVal), '.')
+# pl.legend(['prediction value', 'actual value'])
+# pl.show()

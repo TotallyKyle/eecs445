@@ -2,7 +2,28 @@ TODO:
 - implement validation to optimize # of layers, # of neurons, activation/transfer function
 	nl.net.newff(feature_value_range,[7, 5, 1], [nl.trans.TanSig(), nl.trans.TanSig(), nl.trans.TanSig()])
 - add additional features
+- add up/down trend evaluation
+- NN autoencoder initialization? **
 - implement SVM techniques
+- share training data across multiple currency pairs?
 - K-means, Gaussian Mixture
+	- initialize centroids to location of random data points
+	- use PCA for visualization, show location of clusters
+	- kernelize Gaussian mixture to separate clusters
+- initialization for clusters and nets
+- feature selection **Ablative analysis / reverse ablative analysis?** (yes, and also consider ASU feature selection)
 - Gaussian process
 - Online learning / Hidden Markov Model
+- Mean reversion feature
+
+
+
+-- Show how error changes as we predict furhter into the future
+-- use time series for other features as well
+-- predict also other features we're using
+-- marginalize for forex only (using GP)
+
+-- SVR* or SVM for post-processing
+
+-- yoshia benjo (understanding the difficulty of training deep feedforward neural networks)
+-- ensemble method for combining SVM NN and 

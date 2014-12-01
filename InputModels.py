@@ -4,8 +4,8 @@ import numpy as np
 
 # this generates a sample model whose features are the daily
 # close price of the past <num_days>
-def timeDelayed(num_days):
-	data = parser.init_parse('USDJPY_complete.csv', ['Close'])[0]
+def timeDelayed(num_days, forex_data = 'USDJPY_Complete.csv'):
+	data = parser.init_parse(forex_data, ['Close'])[0]
 	formatted_data = parser.convert_input(data)
 	row_num = 0
 	container = []
@@ -24,8 +24,8 @@ def timeDelayed(num_days):
 	target = normalize_target(target, minVal, maxVal)
 	return container, target, minVal, maxVal
 
-def timeDelayedFeature(num_days):
-	data = parser.init_parse('USDJPY_complete.csv', ['Close'])[0]
+def timeDelayedFeature(num_days, forex_data = 'USDJPY_complete.csv'):
+	data = parser.init_parse(forex_data, ['Close'])[0]
 	formatted_data = parser.convert_input(data)
 	minVal = 9999999
 	maxVal = 0
