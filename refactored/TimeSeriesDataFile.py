@@ -64,10 +64,6 @@ class StandardFileParser:
 
         # Initializes features and mappings from headers
         features = self._InitializeFeatures(file_headers)
-        
-        # Ignore extraneous lines
-        csv_reader.next()
-        csv_reader.next()
 
         for row in csv_reader:
             # parse time
@@ -103,8 +99,9 @@ class StandardFileParser:
 
 
 class AlternateFileParser:
-    def __init__(self, ignored_columns = set([])):
+    def __init__(self, ignored_columns = set([]), date_format = '%m/%d/%y'):
         self._ignoredColumns = ignored_columns
+        self._dateFormat     = date_format
 
     def ParseFile(self, csv_reader):
         # Get feature names (headers in excel file)
@@ -119,11 +116,29 @@ class AlternateFileParser:
 
         for row in csv_reader:
             # parse time
-            date = datetime.strptime(row[self._HeaderIndex('Time')], self._dateFormat)
-
             for feature in features:
-                idx = self._HeaderIndex(feature)
-                val = float(row[idx])
-                features[feature].Append(date, val)
-
+                feature_idx = self._HeaderColumn(feature)
+                time_str    = row[feature_idx]
+                value_str   = row[feature_idx + 1]
+                if time_str != '' and value_str != '':
+                    time = datetime.strptime(time_str, self._dateFormat)
+                    value = float(value_str)
+                    features[feature].Append(time, value)
         return features
+
+    def _InitializeFeatures(self, file_headers):
+        # Initializes a mapping from header to index
+        self._headerToColumnIndexMapping = {}
+        for idx, feature in enumerate(file_headers):
+            if feature != "":
+                self._headerToColumnIndexMapping[feature] = idx
+
+        # Returns a map of FeatureTimeSeries
+        features = {}
+        for feature in file_headers:
+            if feature != "":
+                features[feature] = FeatureTimeSeries(feature)
+        return features
+
+    def _HeaderColumn(self, header):
+        return self._headerToColumnIndexMapping[header]
