@@ -14,8 +14,15 @@ class TimeSeriesDataFile:
         Alternate = 2
 
     def __init__(self, file_path, format):
-        self._filePath = file_path;
-        self._format   = format;
+        self._filePath = file_path
+        self._format   = format
+        self._series   = {}
+
+    def ExtractedFeatureNames(self):
+        return [feature_name for feature_name in self._series]
+
+    def ExtractedFeatures(self):
+        return self._series
 
     #
     #
@@ -24,31 +31,24 @@ class TimeSeriesDataFile:
         with open(self._filePath, 'rb') as f:
             reader = csv.reader(f)
             if (self._format == TimeSeriesDataFile.Formats.Standard):
-                return StandardFileParser().ParseFile(reader) 
+                self._series = StandardFileParser().ParseFile(reader) 
             else:
-                return AlternateFileParser().ParseFile(reader)
+                self._series = AlternateFileParser().ParseFile(reader)
 
 #
 #
 #
 class FeatureTimeSeries:
     def __init__(self, name):
-        self._data = {}
-
         # Publicly accessible
         self.FeatureName = name
-        self.Min  = 99999999
-        self.Max  = 0
+        self.Data = {}
 
     def Append(self, date, feature_value):
-        if feature_value < self.Min:
-            self.Min = feature_value
-        if feature_value > self.Max:
-            self.Max = feature_value
-        self._data[date] = feature_value
+        self.Data[date.date()] = feature_value
 
-    def __str__(self):
-        return self._data.__str__()
+    def TimesSet(self):
+        return set([key for key, val in self.Data.iteritems()])
 
 
 ########## IMPLEMENTATION ##########

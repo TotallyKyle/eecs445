@@ -3,11 +3,11 @@ class FeatureSetBuilder:
     def __init__(self):
         self._featureSet = {}
 
-    def AddFeature(self, feature_name):
+    def AddFeatureTimeSeries(self, feature_time_series):
         return False
 
-    def AddTimeDelayedFeature(self, feature_name):
-        return False
+    def IntersectAddedSeries(self):
+        return False;
 
     def GetFeatureSet(self):
         return self._featureSet

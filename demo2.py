@@ -55,7 +55,6 @@ target = [val for sublist in target for val in sublist]
 target = model.normalize_target(target, target_val[1][0], target_val[1][1])
 
 feature_value_range = parser.convert_feature_value_range(feature_value_range);
-print feature_value_range
 
 data = parser.convert_input(data)
 
@@ -77,6 +76,7 @@ test_size = len(test_input)
 # compliant with the neurolab API, print out the
 # values of inp and tar to see format
 train_input = np.array(train_input)
+
 train_target = np.array(train_target)
 train_target = train_target.reshape(train_size, 1)
 
@@ -86,26 +86,28 @@ train_target = train_target.reshape(train_size, 1)
 # the length of the second list is the # of layers and each number is the # of nerons
 # EX: net = nl.net.newff([[-0.5, 0.5], [-0.5, 0.5], [-1,10]], [5, 3, 1])
 net = nl.net.newff(feature_value_range,[7, 5, 1])
+
 nl.init.midpoint(net.layers[1])
 # Train network
 error = net.train(train_input, train_target, epochs=500, show=100, goal=0.02)
+print error
 
-# Simulate network on tet data
-out = model.denormalize_target(net.sim(test_input).reshape(1,test_size).tolist()[0], minVal, maxVal)
+# # Simulate network on tet data
+# out = model.denormalize_target(net.sim(test_input).reshape(1,test_size).tolist()[0], minVal, maxVal)
 
-# Plot result
-import pylab as pl
-# pl.subplot(211)
-# pl.plot(error)
-# pl.xlabel('Epoch number')
-# pl.ylabel('error (default SSE)')
+# # Plot result
+# import pylab as pl
+# # pl.subplot(211)
+# # pl.plot(error)
+# # pl.xlabel('Epoch number')
+# # pl.ylabel('error (default SSE)')
 
-# x2 = np.linspace(-6.0,6.0,150)
-# y2 = net.sim(x2.reshape(x2.size,1)).reshape(x2.size)
+# # x2 = np.linspace(-6.0,6.0,150)
+# # y2 = net.sim(x2.reshape(x2.size,1)).reshape(x2.size)
 
-# y3 = out.reshape(size)
+# # y3 = out.reshape(size)
 
-# pl.subplot(212)
-pl.plot(range(test_size), out, '-',range(test_size) , model.denormalize_target(test_target, minVal, maxVal), '.')
-pl.legend(['prediction value', 'actual value'])
-pl.show()
+# # pl.subplot(212)
+# pl.plot(range(test_size), out, '-',range(test_size) , model.denormalize_target(test_target, minVal, maxVal), '.')
+# pl.legend(['prediction value', 'actual value'])
+# pl.show()

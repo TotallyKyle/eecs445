@@ -179,7 +179,6 @@ def convert_input(dataset):
 	return list
 
 def convert_feature_value_range(feature_value_ranges):
-	print feature_value_ranges
 	ranges = []
 	for feature in feature_value_ranges:
 			if feature != 'date':
