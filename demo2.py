@@ -55,6 +55,8 @@ target = [val for sublist in target for val in sublist]
 target = model.normalize_target(target, target_val[1][0], target_val[1][1])
 
 feature_value_range = parser.convert_feature_value_range(feature_value_range);
+print feature_value_range
+
 data = parser.convert_input(data)
 
 minVal = min(target)

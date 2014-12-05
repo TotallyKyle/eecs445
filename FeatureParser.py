@@ -22,6 +22,8 @@ def init_parse_alt(filename, feature_names):
 	    feature_col['date'] = 0
 	    for feature in feature_names:
 	    	feature_col[feature] = line.index(feature) + 1
+
+	    print feature_col
 	    #return feature_col
 
 	    for row in reader:
@@ -177,6 +179,7 @@ def convert_input(dataset):
 	return list
 
 def convert_feature_value_range(feature_value_ranges):
+	print feature_value_ranges
 	ranges = []
 	for feature in feature_value_ranges:
 			if feature != 'date':
