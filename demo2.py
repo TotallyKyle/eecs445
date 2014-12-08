@@ -88,12 +88,18 @@ train_target = train_target.reshape(train_size, 1)
 net = nl.net.newff(feature_value_range,[7, 5, 1])
 
 nl.init.midpoint(net.layers[1])
+
+print train_input
+
 # Train network
 error = net.train(train_input, train_target, epochs=500, show=100, goal=0.02)
 print error
 
 # # Simulate network on tet data
-# out = model.denormalize_target(net.sim(test_input).reshape(1,test_size).tolist()[0], minVal, maxVal)
+out = model.denormalize_target(net.sim(test_input).reshape(1,test_size).tolist()[0], minVal, maxVal)
+print out[-5:]
+print test_target[-5:]
+
 
 # # Plot result
 # import pylab as pl

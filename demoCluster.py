@@ -133,6 +133,7 @@ for i in range(num_cluster):
 		cluster_size.append(len(cluster_input[cidx]))
 		cluster_min.append(min(cluster_target[cidx]))
 		cluster_max.append(max(cluster_target[cidx]))
+		print nets[i].sim(cluster_input[i])
 		cluster_prediction.append(model.denormalize_target(nets[i].sim(cluster_input[i]).reshape(1,cluster_size[i]).tolist()[0],cluster_min[i], cluster_max[i]))
 		cidx = cidx + 1
 

@@ -4,27 +4,47 @@ class ModelDataBuilder:
   @staticmethod
   def Normalize(unnormalized_lists):
     normalized_lists = []
+    ranges           = []
+    for l in unnormalized_lists:
+      normalized_lists.append([])
+
     for idx in range(0, len(unnormalized_lists[0])):
       temp = []
       for l in unnormalized_lists:
-        normalized_lists.append([])
         temp.append(l[idx])
 
       min_val = min(temp)
       max_val = max(temp)
 
+      ranges.append([min_val, max_val]);
+
       for i, l in enumerate(unnormalized_lists):
         normalized_target = (l[idx] - min_val) / (max_val - min_val)
         normalized_lists[i].append(normalized_target)
                 
+    return normalized_lists, ranges
 
-    return normalized_lists
+  @staticmethod
+  def Denormalize(normalized_lists, ranges):
+    unnormalized_lists = []
+
+    for row in normalized_lists:
+      unnormalized_row = []
+      for idx, v in enumerate(row):
+        min_val, max_val = ranges[idx]
+        denormalized_value = \
+          (v * (max_val - min_val)) + min_val
+        unnormalized_row.append(denormalized_value)
+      unnormalized_lists.append(unnormalized_row)
+    return unnormalized_lists
 
   def __init__(self, train = .7, validation = 0, test = .3):
-    self._train      = train
-    self._validation = validation
-    self._test       = test
-    self._series     = {}
+    self._train       = train
+    self._validation  = validation
+    self._test        = test
+    self._series      = {}
+    self._features    = None
+    self._outputs     = None
   
   def AddFeatureTimeSeries(self, time_series):
     self._series[time_series.FeatureName] = time_series
@@ -88,13 +108,29 @@ class ModelDataBuilder:
 
       # Map data into outputs
       output_vals = map_output_func(row, idx, self._rawData, date)
-      mapped_output_data.append(output_vals)
-
+      mapped_output_data.append(self._DefaultMapTargetFunction(output_vals))
 
     # Map ranges to 2D array
     mapped_ranges = [ranges[key] for key in sorted(ranges.keys())]
     return mapped_input_data, mapped_output_data, mapped_ranges
 
+  def MapBackToFeatures(self, data):
+    mapped_data = []
+    for row in data:
+      mapped_row = {}
+      for idx, col in enumerate(row):
+        mapped_row[self._features[idx]] = col
+      mapped_data.append(mapped_row)
+    return mapped_data
+
+  def MapBackToOutputs(self, data):
+    mapped_data = []
+    for row in data:
+      mapped_row = {}
+      for idx, col in enumerate(row):
+        mapped_row[self._outputs[idx]] = col
+      mapped_data.append(mapped_row)
+    return mapped_data
 
   def _IntersectedTimeSeriesDates(self):
     iterator = self._series.itervalues()
@@ -106,5 +142,13 @@ class ModelDataBuilder:
     return sorted(times_set)
 
   def _DefaultMapInputFunction(self, row):
-    sorted_keys = sorted(row.keys())
-    return [row[key] for key in sorted_keys]
+    if self._features == None:
+      self._features = sorted(row.keys())
+
+    return [row[key] for key in self._features]
+
+  def _DefaultMapTargetFunction(self, row):
+    if self._outputs == None:
+      self._outputs = sorted(row.keys())
+
+    return [row[key] for key in self._outputs]
