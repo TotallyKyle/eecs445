@@ -65,11 +65,65 @@ class ModelDataBuilder:
     self._dates   = list(date_set)
     self._rawData = data
 
+  def GetRawData(self):
+    data = self._rawData
+    return data
   #
   #
   #
   #
   #
+  def AugmentRawData(self, filter_func, map_input_func):
+    ranges = {}
+    self.filter_func = filter_func
+    for idx, row in enumerate(self._rawData):
+      date = self._dates[idx]
+      if filter_func != None:
+        if filter_func(row, idx, self._rawData, date) == False:
+          continue
+      # Map input row into new features if passed function
+      input_vals = row
+      if map_input_func != None:
+        input_vals = map_input_func(row, idx, self._rawData, date)
+      # Handle ranges for input data
+      for feature, value in input_vals.iteritems():
+        if feature not in ranges:
+          ranges[feature] = [value, value]
+        else:
+          vals = ranges[feature]
+          if value < vals[0]:
+            # new min
+            vals[0] = value
+          if value > vals[1]:
+            # new max
+            vals[1] = value
+    self._rawRange = ranges
+
+  def MapInputToArrays(self):
+    mapped_input_data = []
+    for idx, row in enumerate(self._rawData):
+      date = self._dates[idx]
+      if self.filter_func != None:
+        if self.filter_func(row, idx, self._rawData, date) == False:
+          continue
+      mapped_input_data.append(self._DefaultMapInputFunction(row))
+    return mapped_input_data
+
+  def MapOutputToArrays(self, map_output_func, target_filter_func = None):
+    mapped_output_data = []
+    for idx, row in enumerate(self._rawData):
+      date = self._dates[idx]
+      if target_filter_func != None:
+        if target_filter_func(row, idx, self._rawData, date) == False:
+          continue
+      output_vals = map_output_func(row, idx, self._rawData, date)
+      mapped_output_data.append(self._DefaultMapTargetFunction(output_vals))
+    return mapped_output_data
+
+  def MapRangesToArray(self):
+    mapped_ranges = [self._rawRange[key] for key in sorted(self._rawRange.keys())]
+    return mapped_ranges
+
   def MapToArrays(self, map_output_func, filter_func = None, map_input_func = None):
     # Map array of dictionaries to array of lists
     mapped_input_data  = []
