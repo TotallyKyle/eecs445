@@ -76,19 +76,21 @@ class ModelDataBuilder:
     mapped_output_data = []
     ranges             = {}
 
+    num_rows = len(self._rawData)
+
     # Assumes that raw data has been built
     for idx, row in enumerate(self._rawData):
       date = self._dates[idx]
 
       # Filter based on passed function
       if filter_func != None:
-        if filter_func(row, idx, self._rawData, date) == False:
+        if filter_func(idx, num_rows, date) == False:
           continue
 
       # Map input row into new features if passed function
       input_vals = row
       if map_input_func != None:
-        input_vals = map_input_func(row, idx, self._rawData, date)
+        input_vals = map_input_func(idx, self._rawData)
 
       # Handle ranges for input data
       for feature, value in input_vals.iteritems():
@@ -107,7 +109,7 @@ class ModelDataBuilder:
 
 
       # Map data into outputs
-      output_vals = map_output_func(row, idx, self._rawData, date)
+      output_vals = map_output_func(idx, self._rawData)
       mapped_output_data.append(self._DefaultMapTargetFunction(output_vals))
 
     # Map ranges to 2D array
