@@ -22,23 +22,33 @@ while True:
   # Need to Intersect on dates
   data_builder = ModelDataBuilder(train = .7, test = .3)
   data_builder.AddFeatureTimeSeries(f_features['Close'])
+  data_builder.AddFeatureTimeSeries(f_features['Volume'])
   data_builder.AddFeatureTimeSeries(f2_features['DJIA USA'])
   data_builder.AddFeatureTimeSeries(f2_features['NYK'])
   data_builder.BuildRawTimeSeries()
 
-  def filter_func (row, idx, raw_data, date):
-    return idx - 5 > 0 and idx + 2 < len(raw_data)
+  def input_filter_func (idx, num_rows, date):
+    return idx - 30 >= 0 and idx + 2 < num_rows
 
-  def map_input_func (row, idx, raw_data, date):
+  def output_filter_func (idx, num_rows, date):
+    return idx - 30 >= 0 and idx + 2 < num_rows
+
+  def map_input_func (idx, raw_data):
     prev_times = {}
+    moving_avgs = {}
+    row = raw_data[idx]
     for i in range(1, 6):
       prev_times[str(i)] = raw_data[idx - i]['Close']
-
     row.update(prev_times)
+    data = raw_data[idx-5:idx]
+    moving_avgs['MA5'] = sum([point['Close'] for point in data]) / 5
+    data = raw_data[idx-30:idx]
+    moving_avgs['MA30'] = sum([point['Close'] for point in data]) / 30
+    row.update(moving_avgs)
     return row
 
   # Give time series value
-  def map_target_func (row, idx, raw_data, date):
+  def map_target_func (idx, raw_data):
     outputs = {
       'Close'  : raw_data[idx + 1]['Close'],
       'Close Tomorrow' : raw_data[idx + 2]['Close']
@@ -46,7 +56,12 @@ while True:
 
     return outputs
 
-  [inputs, targets, feature_ranges] = data_builder.MapToArrays(map_target_func, filter_func, map_input_func)
+  data_builder.AugmentRawData(input_filter_func, map_input_func)
+  data = data_builder.GetRawData()
+
+  inputs = data_builder.MapInputToArrays()
+  targets = data_builder.MapOutputToArrays(map_target_func, output_filter_func)
+  feature_ranges = data_builder.MapRangesToArray()
 
   # Initialize some nn
   net = nl.net.newff(feature_ranges, [len(inputs[0]), 5, len(targets[0])])
