@@ -61,15 +61,8 @@ def map_target_func (idx, raw_data):
   return outputs
 
 data, _ = data_builder.GenerateFeatures(filter_func, map_input_func, map_target_func)
-for row in data:
-  row.pop('Volume')
-
-inv_beta = [0.00001, 0.001, 0.01, 0.1, 1, 100]
-inv_sigma = [0.001, 0.01, 0.1, 1, 10, 100]
 
 gp = GP(data)
-errors = evaluate.kfolds(data[:1501], inv_beta, inv_sigma)
-errors = np.array(errors)
-ideal = np.unravel_index(errors.argmin(), errors.shape)
-print "best inverse beta:", inv_beta[ideal[0]]
-print "best inverse sigma:", inv_sigma[ideal[1]]
+output = gp.predict(1, gp.test_data[0:100])
+evaluate.evaluate_by_feature_with_distribution(output[0], gp.test_data, gp.features, 'Close')
+evaluate.line_graph(output, gp.test_data, gp.features, 'Close')
