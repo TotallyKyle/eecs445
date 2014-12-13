@@ -14,9 +14,14 @@ class FeatureSetOptimizer:
   def AddDataColumn(self, data_column):
     self._modelDataBuilder.AddFeatureTimeSeries(data_column)
 
-  def OptimizeFeatureSet(self, model):
+  def OptimizeFeatureSet(self, model, from_feature = None):
     self._modelDataBuilder.BuildRawTimeSeries()
     for idx, feature_key_set in enumerate(FeatureSetSpace(self.FeatureKeys, self._minFeatures, self.RequiredKeys)):
+      f = open('tmp/feature_set_optimizer_cur_set', 'w')
+      f.write(str(feature_key_set))
+      if from_feature != None and feature_key_set != from_feature:
+        continue
+
       feature_set, output_set = self._modelDataBuilder.GenerateFeatures(
         functools.partial(self.RowFilterer, feature_key_set),
         functools.partial(self.RowFeatureMapper, feature_key_set),
@@ -28,6 +33,7 @@ class FeatureSetOptimizer:
 
       try:
         self._optimalFeatures.put((error, feature_key_set, extra_data), False)
+        optimal_values = FeatureSetOptimizer.ToList(self._optimalFeatures, self._k)
       except Queue.Full:
         pass   
 

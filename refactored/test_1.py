@@ -4,8 +4,27 @@ from   ErrorAnalyser      import  ErrorAnalyser
 from   sklearn            import  cross_validation
 import numpy              as      np
 import neurolab           as      nl
+from   AccuracyEvaluation import  RMSE
+from   Queue              import  PriorityQueue
+import json
+
+best_found = [
+  (1000, None),
+  (1000, None),
+  (1000, None),
+  (1000, None),
+  (1000, None),
+  (1000, None),
+  (1000, None),
+  (1000, None),
+  (1000, None),
+  (1000, None)
+];
+
 
 while True:
+  print 'Currently best found RMSE : ' + str(best_found[0][0])
+
 
   # Initialize references to files
   f  = TimeSeriesDataFile('USDJPY_complete.csv', TimeSeriesDataFile.Formats.Standard)
@@ -50,18 +69,12 @@ while True:
   # Give time series value
   def map_target_func (idx, raw_data):
     outputs = {
-      'Close'  : raw_data[idx + 1]['Close'],
-      'Close Tomorrow' : raw_data[idx + 2]['Close']
+      'Close'  : raw_data[idx + 1]['Close']
     }
 
     return outputs
 
-  data_builder.AugmentRawData(input_filter_func, map_input_func)
-  data = data_builder.GetRawData()
-
-  inputs = data_builder.MapInputToArrays()
-  targets = data_builder.MapOutputToArrays(map_target_func, output_filter_func)
-  feature_ranges = data_builder.MapRangesToArray()
+  inputs, targets, feature_ranges = data_builder.MapToArrays(map_target_func, input_filter_func, map_input_func)
 
   # Initialize some nn
   net = nl.net.newff(feature_ranges, [len(inputs[0]), 5, len(targets[0])])
@@ -82,18 +95,16 @@ while True:
     goal=0.02
   )
 
-
   predicted = ModelDataBuilder.Denormalize(net.sim(inputs_test), r)
   actual    = ModelDataBuilder.Denormalize(targets_test, r)
 
   labeled_predicted = data_builder.MapBackToOutputs(predicted)
   labeled_actual    = data_builder.MapBackToOutputs(actual)
 
-  print labeled_predicted[-5:]
-  print labeled_actual[-5:]
-
-  analyser = ErrorAnalyser(labeled_predicted, labeled_actual)
-  print analyser.AverageErrorForOutput('Close')
-  print analyser.AverageErrorForOutput('Close Tomorrow')
-  # v.GenerateOutputErrorHistogram('Close')
-  # v.GenerateLinearErrorPlot(['Close, Next Day Close'])
+  for i, (rmse, init_data) in enumerate(best_found):
+    cur_rmse = RMSE([data[0] for data in predicted], [data[0] for data in actual])
+    if cur_rmse < rmse:
+      best_found[i] = cur_rmse, [layer.np for layer in net.layers]
+      f = open('tmp/best_found.txt', 'w')
+      f.write(str(best_found))
+      break
