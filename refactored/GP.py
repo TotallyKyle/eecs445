@@ -27,7 +27,7 @@ class GP:
 	def kernel(self, a, b, inverse_beta=0.01, inverse_sigma=0.0001):
 	    """ GP squared exponential kernel """
 	    sqdist = np.sum(a**2,1).reshape(-1,1) + np.sum(b**2,1) - 2*np.dot(a, b.T)
-	    return np.exp(-0.5*inverse_sigma*inverse_sigma*sqdist)
+	    return np.exp(-0.5*inverse_sigma*self.inverse_sigma*sqdist)
 
 	def predict_feature(self, target_name, train_data=None, train_target = None, test_data=None, covariance=None):
 		if train_data is None:
