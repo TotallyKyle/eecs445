@@ -27,15 +27,16 @@ while True:
   data_builder.AddFeatureTimeSeries(f2_features['NYK'])
   data_builder.BuildRawTimeSeries()
 
-  def input_filter_func (row, idx, raw_data, date):
-    return idx - 30 >= 0 and idx + 2 < len(raw_data)
+  def input_filter_func (idx, num_rows, date):
+    return idx - 30 >= 0 and idx + 2 < num_rows
 
-  def output_filter_func (row, idx, raw_data, date):
-    return idx - 30 >= 0 and idx + 2 < len(raw_data)
+  def output_filter_func (idx, num_rows, date):
+    return idx - 30 >= 0 and idx + 2 < num_rows
 
-  def map_input_func (row, idx, raw_data, date):
+  def map_input_func (idx, raw_data):
     prev_times = {}
     moving_avgs = {}
+    row = raw_data[idx]
     for i in range(1, 6):
       prev_times[str(i)] = raw_data[idx - i]['Close']
     row.update(prev_times)
@@ -47,7 +48,7 @@ while True:
     return row
 
   # Give time series value
-  def map_target_func (row, idx, raw_data, date):
+  def map_target_func (idx, raw_data):
     outputs = {
       'Close'  : raw_data[idx + 1]['Close'],
       'Close Tomorrow' : raw_data[idx + 2]['Close']
