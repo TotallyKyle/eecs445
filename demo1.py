@@ -19,7 +19,7 @@ import FeatureParser as parser
 # data[0] = input, data[1] = output
 # data[2] = min_val, data[3] = max_val in this sample model
 
-data = model.timeDelayed(5)
+data = model.timeDelayed(5, '/afs/umich.edu/user/m/i/migchez/Fall2014/EECS445/project/USDJPY_complete.csv')
 
 # we still need to implement validation so 0% is used for validation
 # 70% of the data is used for training and 30% for testing here
@@ -43,6 +43,9 @@ train_target = train_target.reshape(train_size, 1)
 
 min_val = data[2]
 max_val = data[3]
+
+print min_val
+print max_val
 
 # Create network with 3 layers with 5, 5, and 1 neruon(s) in each layer 
 # and randomly initialized

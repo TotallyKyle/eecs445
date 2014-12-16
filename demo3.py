@@ -74,8 +74,12 @@ train_target = train_target.reshape(train_size, 1)
 # the length of the second list is the # of layers and each number is the # of nerons
 # EX: net = nl.net.newff([[-0.5, 0.5], [-0.5, 0.5], [-1,10]], [5, 3, 1])
 
+print feature_value_range
+
 net = nl.net.newff(feature_value_range,[3, 5, 1])
 
+
+print train_input
 
 # Train network
 error = net.train(train_input, train_target, epochs=500, show=100, goal=0.02)
