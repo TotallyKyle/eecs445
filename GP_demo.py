@@ -13,11 +13,14 @@ f = lambda x: np.sin(0.9*x).flatten()
 # Define the kernel
 def kernel(a, b):
     """ GP squared exponential kernel """
-    kernelParameter = 0.1
+    kernelParameter = 10000
     sqdist = np.sum(a**2,1).reshape(-1,1) + np.sum(b**2,1) - 2*np.dot(a, b.T)
-    return np.exp(-.5 * (1/kernelParameter) * sqdist)
+    print sqdist
+    #return np.exp(-.5 * (1/kernelParameter) * sqdist)
+    print np.exp(-0.5*0.0001*sqdist)
+    return np.exp(-0.5*0.0001*sqdist)
 
-N = 10         # number of training points.
+N = 80         # number of training points.
 n = 50         # number of test points.
 s = 0.00005    # noise variance.
 
