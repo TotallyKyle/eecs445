@@ -135,7 +135,7 @@ class ModelDataBuilder:
     mapped_ranges = [self._rawRange[key] for key in sorted(self._rawRange.keys())]
     return mapped_ranges
 
-  def MapToArrays(self, map_output_func, filter_func = None, map_input_func = None):
+  def MapToArrays(self, filter_func, map_input_func, map_output_func):
     # Map array of dictionaries to array of lists
     mapped_input_data  = []
     mapped_output_data = []
