@@ -1,0 +1,117 @@
+\documentclass[twoside]{article}
+
+\usepackage{lipsum} % Package to generate dummy text throughout this template
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\linespread{1.05} % Line spacing - Palatino needs more space between lines
+\usepackage{microtype} % Slightly tweak font spacing for aesthetics
+
+\usepackage[hang, small,labelfont=bf,up,textfont=it,up]{caption} % Custom captions under/above floats in tables or figures
+\usepackage{booktabs} % Horizontal rules in tables
+\usepackage{hyperref} % For hyperlinks in the PDF
+
+\usepackage{fullpage}
+
+\usepackage{titlesec} % Allows customization of titles
+\renewcommand\thesection{\Roman{section}} % Roman numerals for the sections
+\renewcommand\thesubsection{\Roman{subsection}} % Roman numerals for subsections
+\titleformat{\section}[block]{\large\scshape\centering}{\thesection.}{1em}{} % Change the look of the section titles
+\titleformat{\subsection}[block]{\large}{\thesubsection.}{1em}{} % Change the look of the section titles
+
+%----------------------------------------------------------------------------------------
+% TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\title{\vspace{-15mm}\fontsize{24pt}{10pt}\selectfont\textbf{Article Title}} % Article title
+
+\author{
+\large
+\textsc{Miguel Sanchez Jeff Hsuing Kyle Zhang}\\
+\normalsize migchez@umich.edu test@umich.edu % Your email address
+\vspace{-5mm}
+}
+\date{}
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle % Insert title
+
+%----------------------------------------------------------------------------------------
+% ABSTRACT
+%----------------------------------------------------------------------------------------
+
+\begin{abstract}
+
+\noindent \lipsum[1] % Dummy abstract text
+
+\end{abstract}
+
+%----------------------------------------------------------------------------------------
+% ARTICLE CONTENTS
+%----------------------------------------------------------------------------------------
+
+\section{Introduction}
+
+Problem description and motivation. Why do you want to solve this problem? What's the impact if you can solve this problem?\\
+
+Generally when one thinks of trading, they think of national markets with a central exchange such as the DOW Jones or the Nasdaq. These markets have been the subject of significant technological investment, and the automated trading industry has developed reliable infrastructure which has generated huge returns for the parties behind the technology. Yet, other markets exist, some of which are significantly more interesting for various reasons. One of these markets is the Foreign Exchange Market, which allows parties to exchange some amount of one countries currency into another parties at some changing rate determined by the market.\\
+
+This market is interesting for various reasons. For one thing, it is the largest and most liquid market in the world, with daily traded volume exceeding a trillion USD according to the Bank of International Settlements. It is a global and decentralized market, with centers around the world open 24 hours a day allowing trading. This networked market determines the exchange rates between countries, often reflecting the relative economic state between countries.\\
+
+All these factors, along with the relative youth of the market compared to other large markets, make the market very interesting from a investing point of view. It is fairly evident that a machine which could predict future trends in the market would be of great value. Some research has been done in an effort to predict these future trends, much of it fairly sophisticated and algorithmically impressive. Even with the development and use of these complicated algorithms, results generally have been okay at best.\\
+
+In this paper, we describe the development and structure of our neural network, and finally present our conclusions on how our model performed in the prediction of next day trends.
+
+%------------------------------------------------
+
+\section{Proposed method}
+
+How are you going to solve this problem? Why should the proposed method work? Provide technical details of your approach if you are proposing a novel method.\\
+\lipsum[4] % Dummy text
+
+%------------------------------------------------
+
+\section{Related work}
+
+What are existing methods? What are the state-of-the-art methods for this problem? How is your approach different from the related work?\\
+
+\lipsum[5] % Dummy text
+
+%------------------------------------------------
+
+\section{Experimental results}
+
+Milestones achieved so far (add all relevant experimental results). How do these results support your claim?\\
+
+\lipsum[5] % Dummy text
+
+
+%------------------------------------------------
+
+\section{Conclusion}
+
+Summary of your results. What have you learned? What’s the biggest contribution of this project?\\
+
+\lipsum[5] % Dummy text
+
+
+%----------------------------------------------------------------------------------------
+% REFERENCE LIST
+%----------------------------------------------------------------------------------------
+
+\begin{thebibliography}{99} % Bibliography - this is intentionally simple in this template
+
+\bibitem[Figueredo and Wolf, 2009]{Figueredo:2009dg}
+Figueredo, A.~J. and Wolf, P. S.~A. (2009).
+\newblock Assortative pairing and life history strategy - a cross-cultural
+  study.
+\newblock {\em Human Nature}, 20:317--330.
+ 
+\end{thebibliography}
+
+%----------------------------------------------------------------------------------------
+
+
+\end{document}

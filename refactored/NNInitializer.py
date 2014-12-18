@@ -1,18 +1,3 @@
-from   TimeSeriesDataFile import  TimeSeriesDataFile
-from   ModelDataBuilder   import  ModelDataBuilder
-from   ErrorAnalyser      import  ErrorAnalyser
-from   sklearn            import  cross_validation
-import numpy              as      np
-import neurolab           as      nl
-from   AccuracyEvaluation import  RMSE
-from   Queue              import  PriorityQueue
-from   neurolab_extension import  net_init
-import json
-
-
-# Initialize references to files
-f  = TimeSeriesDataFile('USDJPY_complete.csv', TimeSeriesDataFile.Formats.Standard)
-f2 = TimeSeriesDataFile('initial_features_edited.csv', TimeSeriesDataFile.Formats.Alternate)
 
 initial_values = [{'b': np.array([ -0.62295578,   1.84040558,  -1.17521869,   0.46117341,
         -0.69931897,   0.27616017, -14.07748004,   0.58938518,
@@ -75,76 +60,7 @@ initial_values = [{'b': np.array([ -0.62295578,   1.84040558,  -1.17521869,   0.
          0.01823029,  1.48362618, -0.02134072, -0.87704261,  0.70584622,
         -1.15288426]])}, {'b': np.array([ 2.32495693]), 'w': np.array([[ 5.80240518,  6.10279995,  4.82840441,  0.35600683,  2.79337199]])}]
 
-# Extract features
-f.ExtractAllFeatures()
-f2.ExtractAllFeatures()
 
-# Get Extracted Features
-f_features  = f.ExtractedFeatures()
-f2_features = f2.ExtractedFeatures()
 
-# Need to Intersect on dates
-data_builder = ModelDataBuilder(train = .7, test = .3)
-data_builder.AddFeatureTimeSeries(f_features['Close'])
-data_builder.AddFeatureTimeSeries(f_features['Volume'])
-data_builder.AddFeatureTimeSeries(f2_features['DJIA USA'])
-data_builder.AddFeatureTimeSeries(f2_features['NYK'])
-data_builder.BuildRawTimeSeries()
-
-def input_filter_func (idx, num_rows, date):
-  return idx - 30 >= 0 and idx + 2 < num_rows
-
-def output_filter_func (idx, num_rows, date):
-  return idx - 30 >= 0 and idx + 2 < num_rows
-
-def map_input_func (idx, raw_data):
-  prev_times = {}
-  moving_avgs = {}
-  row = raw_data[idx]
-  for i in range(1, 6):
-    prev_times[str(i)] = raw_data[idx - i]['Close']
-  row.update(prev_times)
-  data = raw_data[idx-5:idx]
-  moving_avgs['MA5'] = sum([point['Close'] for point in data]) / 5
-  data = raw_data[idx-30:idx]
-  moving_avgs['MA30'] = sum([point['Close'] for point in data]) / 30
-  row.update(moving_avgs)
-  return row
-
-# Give time series value
-def map_target_func (idx, raw_data):
-  outputs = {
-    'Close'  : raw_data[idx + 1]['Close']
-  }
-
-  return outputs
-
-inputs, targets, feature_ranges = data_builder.MapToArrays(input_filter_func, map_input_func, map_target_func)
-
-# Initialize some nn
-net = nl.net.newff(feature_ranges, [len(inputs[0]), 5, len(targets[0])])
-net_init(net, initial_values)
-
-inputs = np.array(inputs)
-targets, r = np.array(ModelDataBuilder.Normalize(targets))
-
-# Split for cross validation
-inputs_train, inputs_test, targets_train, targets_test = \
-  cross_validation.train_test_split(inputs, targets, test_size=0.2, random_state=0)
-
-print inputs_train
-print targets_train
-
-error = net.train(
-  inputs_train,
-  targets_train,
-  epochs=500,
-  show=100,
-  goal=0.02
-)
-
-predicted = ModelDataBuilder.Denormalize(net.sim(inputs_test), r)
-actual    = ModelDataBuilder.Denormalize(targets_test, r)
-
-v = ErrorAnalyser(predicted, actual)
-v.GenerateLineGraph()
+def NN_Initial_Values():
+   return initial_values

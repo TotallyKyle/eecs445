@@ -1,4 +1,4 @@
-
+import matplotlib.pyplot as plot
 
 class ErrorAnalyser:
 
@@ -17,3 +17,7 @@ class ErrorAnalyser:
 
   def AddOutputErrorHistogram(self, output):
     print outputs
+
+  def GenerateLineGraph(self):
+    plot.plot(self._predicted)
+    plot.show()
