@@ -12,7 +12,7 @@ import numpy as np
 import InputModels as model
 import FeatureParser as parser
 import random
-from scipy.cluster.vq import kmeans,vq
+from scikits.learn.gmm import GMM
 
 # Create train samples, in this case the input data model
 # has 5 features, to predict the exchange rate on day N
@@ -89,16 +89,11 @@ train_input = np.array(train_input)
 train_target = np.array(train_target)
 train_target = train_target.reshape(train_size, 1)
 
-# computing K-Means with K = 2 (2 clusters)
-init_centroids = []
-num_cluster = 2
-for i in range(num_cluster):
-	idx = random.randint(0,len(train_input)-1)
-	init_centroids.append(train_input[idx])
-init_centroids = np.array(init_centroids)
-centroids,_ = kmeans(train_input, init_centroids)
-# assign each sample to a cluster
-idx,_ = vq(train_input,centroids)
+# computing GMM with K = 2 (2 clusters)
+g = GMM(n_states = 2, n_dim = len(input[0]))
+np.round(g.weights, 2)
+np.round(g.means, 2)
+g.fit(train_input)
 
 # Create network with 3 layers with 5, 5, and 1 neruon(s) in each layer 
 # and randomly initialized

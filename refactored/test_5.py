@@ -2,10 +2,12 @@ from   TimeSeriesDataFile import  TimeSeriesDataFile
 from   ModelDataBuilder   import  ModelDataBuilder
 from   ErrorAnalyser      import  ErrorAnalyser
 from   sklearn            import  cross_validation
+import matplotlib.pyplot  as      plt
 import numpy              as      np
 import neurolab           as      nl
 from   GP                 import  GP
 import GP_Evaluation      as evaluate
+
 
 
 
@@ -25,6 +27,7 @@ f2_features = f2.ExtractedFeatures()
 data_builder = ModelDataBuilder(train = .7, test = .3)
 data_builder.AddFeatureTimeSeries(f_features['Close'])
 data_builder.AddFeatureTimeSeries(f_features['Volume'])
+data_builder.AddFeatureTimeSeries(f_features['RSI'])
 data_builder.AddFeatureTimeSeries(f2_features['DJIA USA'])
 data_builder.AddFeatureTimeSeries(f2_features['NYK'])
 data_builder.BuildRawTimeSeries()
@@ -62,7 +65,62 @@ def map_target_func (idx, raw_data):
 
 data, _ = data_builder.GenerateFeatures(filter_func, map_input_func, map_target_func)
 
+for row in data:
+  row.pop('Volume', None)
 gp = GP(data)
-output = gp.predict(1, gp.test_data[0:100])
+output = gp.predict(4, gp.test_data[0:100])
 evaluate.evaluate_by_feature_with_distribution(output[0], gp.test_data, gp.features, 'Close')
 evaluate.line_graph(output, gp.test_data, gp.features, 'Close')
+
+num_data = len(output[0])
+num_days = len(output[0][0])
+feature = gp.features.index('Close')
+mu = output[0]
+s = output[1]
+for day in range(1, num_days):
+  predictions = []
+  targets = []
+  prediction = np.array([data_pt[day][0][feature] for data_pt in mu])
+  target = np.array([row[feature] for row in gp.test_data[day:num_data+day]])
+  predictions = np.concatenate([prediction, predictions])
+  targets = np.concatenate([target, targets])
+
+  trend_output = predictions[1:]
+  trend_test = targets[1:]
+  flag = False
+  counter = 0
+  for x in predictions:
+    if(flag):
+      if(x >= prev):
+        trend_output[counter] = 1
+      else:
+        trend_output[counter] = -1
+      counter += 1
+    flag = True
+    prev = x
+
+  counter = 0
+  flag = False
+  for x in targets:
+    if(flag):
+      if(x >= prev):
+        trend_test[counter] = 1
+      else:
+        trend_test[counter] = -1
+      counter += 1
+    flag = True
+    prev = x
+
+  x = np.arange(min([len(trend_test), len(trend_output)]))
+  counter = 0.0
+  for y in x:
+    if(trend_output[y] == trend_test[y]):
+      counter +=1.0
+
+  print counter / min([len(trend_test), len(trend_output)])
+  plt.plot(x, trend_output[x])  
+  plt.plot(x, trend_test[x])
+
+  plt.legend(['Predicted', 'Actual'], loc='upper right')
+  plt.axis([0, len(trend_output), -3, 3])
+  plt.show()
