@@ -152,6 +152,9 @@ class ModelDataBuilder:
         if filter_func(idx, num_rows, date) == False:
           continue
 
+      if len(mapped_input_data) == 0:
+        print date
+
       # Map input row into new features if passed function
       input_vals = row
       if map_input_func != None:
